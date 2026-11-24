@@ -3,30 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <title>Amigo Invisible</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap">
-<style id="css">
-/* Layout: one centred column; screens (setup, who-are-you, confirm, gift, result) swap in place over a light snowfall */
+<style>
 :root{
   --bg:#eef3ef; --surface:#ffffff; --fg:#17261d; --muted:#5b6d61; --line:#d3ded6;
   --pine:#1f5c3f; --pine-ink:#ffffff; --berry:#c2364a; --gold:#d9a227; --soft:#e2ece5; --snow:rgba(31,92,63,.16);
   --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme:dark){:root{
   --bg:#0f1712; --surface:#17221b; --fg:#e7f0ea; --muted:#9db0a3; --line:#2a3a30;
   --pine:#3f9a6c; --pine-ink:#08130d; --berry:#f06a7c; --gold:#e8b94a; --soft:#1d2b22; --snow:rgba(231,240,234,.22); color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0f1712; --surface:#17221b; --fg:#e7f0ea; --muted:#9db0a3; --line:#2a3a30;
-  --pine:#3f9a6c; --pine-ink:#08130d; --berry:#f06a7c; --gold:#e8b94a; --soft:#1d2b22; --snow:rgba(231,240,234,.22); color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{min-height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 56px;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(32px + env(safe-area-inset-top,0px));padding-bottom:calc(56px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
 #snow,#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
 #snow{z-index:0}#confetti{z-index:30}
-.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto}
+.screen{display:flex;flex-direction:column;gap:20px;animation:fadein .35s ease}
 h1,h2{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
 h1{font-size:clamp(2rem,7vw,2.8rem);font-weight:800;line-height:1.05}
 h2{font-size:1.15rem;font-weight:600}
@@ -34,6 +32,7 @@ p{margin:0}
 .lead{color:var(--muted);max-width:60ch}
 .eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--berry);font-weight:600}
 .center{text-align:center;align-items:center}
+.stack{display:flex;flex-direction:column;gap:10px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
 label{font-weight:600;font-size:.9rem}
 .field{display:flex;flex-direction:column;gap:6px}
@@ -44,9 +43,9 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--berry);outline-
 .row{display:flex;gap:8px}.row input{flex:1}
 button{font:inherit;font-weight:600;cursor:pointer;border-radius:10px;border:1px solid transparent;padding:10px 16px;transition:transform .15s ease,background .2s}
 button:active{transform:scale(.97)}
+button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:var(--pine);color:var(--pine-ink)}
-.primary.big{padding:14px 22px;font-size:1.05rem}
-.primary:disabled{opacity:.45;cursor:not-allowed}
+.big{padding:14px 22px;font-size:1.05rem}
 .ghost{background:transparent;color:var(--fg);border-color:var(--line)}
 .link{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px;font-weight:500}
 .chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
@@ -58,17 +57,28 @@ button:active{transform:scale(.97)}
 .pill{background:var(--soft);border-radius:999px;padding:4px 14px;font-weight:600;font-size:.9rem;font-variant-numeric:tabular-nums}
 .actions{display:flex;flex-wrap:wrap;gap:8px}
 .center .actions{justify-content:center}
+.linkbox{font-family:ui-monospace,monospace;font-size:.85rem;background:var(--soft);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere}
 
-/* who are you */
 .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.person{background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
-  animation:rise .45s both cubic-bezier(.2,.9,.3,1.2);animation-delay:calc(var(--i) * 45ms)}
-.person:hover{transform:translateY(-3px) rotate(-1deg);border-color:var(--pine)}
-.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.2rem;color:#fff;background:var(--c)}
+.person{background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.people.intro .person{animation:rise .45s both cubic-bezier(.2,.9,.3,1.2);animation-delay:calc(var(--i) * 45ms)}
+.person:not(.taken):hover{transform:translateY(-3px) rotate(-1deg);border-color:var(--pine)}
 .person span{font-weight:600;overflow-wrap:anywhere;text-align:center}
-.person.me{border-color:var(--berry);box-shadow:0 0 0 2px var(--berry) inset}
+.person small{font-size:.78rem;color:var(--muted);font-weight:500}
+.person.taken{opacity:.5;cursor:not-allowed;background:var(--soft)}
+.person.taken .avatar{filter:grayscale(1)}
+.person.mine{border-color:var(--berry);box-shadow:0 0 0 2px var(--berry) inset}
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.2rem;color:#fff;background:var(--c)}
 
-/* gift */
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.list li:first-child{border-top:0}
+.list .who{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.list button{padding:6px 12px;font-size:.9rem}
+.status{font-size:.8rem;font-weight:600;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.status.in{background:var(--pine);color:var(--pine-ink)}
+.status.out{background:var(--soft);color:var(--muted)}
+
 .stage{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 12px 32px}
 .gift{width:150px;height:150px;position:relative;border:0;background:none;padding:0;cursor:pointer;animation:bob 2.4s ease-in-out infinite}
 .gift .box{position:absolute;left:15px;right:15px;bottom:0;height:90px;background:var(--pine);border-radius:10px}
@@ -86,78 +96,54 @@ button:active{transform:scale(.97)}
 .taps{display:flex;gap:8px}
 .taps i{width:10px;height:10px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
 .taps i.on{background:var(--berry);transform:scale(1.3)}
-.slot{height:4.2rem;overflow:hidden;display:grid;place-items:center;width:100%}
+.slot{min-height:4.2rem;display:grid;place-items:center;width:100%}
 .name{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,10vw,3.4rem);line-height:1.05;color:var(--berry);overflow-wrap:anywhere;text-align:center}
-.slot .name.tick{animation:tick .1s linear}
+.name.tick{animation:tick .1s linear;color:var(--muted)}
 .name.land{animation:land .7s cubic-bezier(.3,1.7,.5,1)}
 
-/* drawing animation (organizer) */
 .shuffle{position:relative;height:220px;overflow:hidden}
 .shuffle .tag{position:absolute;left:50%;top:50%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:600;white-space:nowrap;
-  transition:transform .55s cubic-bezier(.5,0,.3,1.3)}
-
-.links{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.links li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
-.links li:first-child{border-top:0}
-.links .who{font-weight:600;min-width:0;overflow-wrap:anywhere}
-.links button{padding:6px 12px;font-size:.9rem}
-.toast{position:fixed;z-index:40;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;font-size:.9rem;animation:rise .25s}
-.screen{display:flex;flex-direction:column;gap:20px;animation:fadein .35s ease}
+  transform:translate(-50%,-50%);transition:transform .55s cubic-bezier(.5,0,.3,1.3)}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--pine);animation:spin 1s linear infinite;margin:24px auto}
+.toast{position:fixed;z-index:40;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;font-size:.9rem;animation:rise .25s;max-width:calc(100% - 32px);text-align:center}
+code,pre{font-family:ui-monospace,monospace;font-size:.85rem}
 
 @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes pop{from{transform:scale(.6)}to{transform:none}}
-@keyframes fadein{from{opacity:.0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
 @keyframes lidoff{to{transform:translate(70px,-110px) rotate(48deg);opacity:0}}
 @keyframes squash{40%{transform:scaleY(.86) scaleX(1.08)}100%{transform:none}}
 @keyframes tick{from{transform:translateY(-60%);opacity:.2}to{transform:none;opacity:1}}
 @keyframes land{0%{transform:scale(.4);opacity:0}100%{transform:none;opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
-
 </head>
 <body>
 <canvas id="snow" aria-hidden="true"></canvas>
 <canvas id="confetti" aria-hidden="true"></canvas>
-<div class="wrap" id="app"></div>
+<div class="wrap" id="app"><div class="spinner" role="status" aria-label="Cargando"></div></div>
 <div class="toast" id="toast" hidden></div>
 
-<script type="application/json" id="sorteo">{"event":"","budget":"25","date":"","people":["akash","jorge","jorge culon","sergio","levi","gurki","caballo","emilio"],"pairs":"407a760b4b4a1b400c1a0b5048404d49015c0d6f187e0d424c4b464301460c1a0b404c504b4c0211721e6f075c445f4e4e404f050c5742525a4a0e7841680d535f445c490f050545025b495309505c4e434b4f6e0369164f40534a4c074c184541580b1f0b4843570a560d6f187e0d4b425b404a4f050c53445a454b4307301f74105148464d444605034f4e5b44425a0b7f007e4f545a405f4c0d0d0f454259040b736b","drawnAt":"2026-11-24T20:11:17.871Z"}</script>
-<script id="main">
-const BASE_URL = "https://claude.ai/artifact/8AHVT4KWFcY3TakLiV3wJW";
-const KEY = "amigo-invisible-sorteo";
-const enc = new TextEncoder();
+<script type="module">
+// =====================================================================
+//  PEGA AQUÍ LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE
+//  (Firebase > Configuración del proyecto > Tus apps > Web > firebaseConfig)
+// =====================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAJb9timwoJe2OC4Pbg1SQZZTNg-giN_so",
+  authDomain: "amigo-invisible-111.firebaseapp.com",
+  projectId: "amigo-invisible-111",
+  storageBucket: "amigo-invisible-111.firebasestorage.app",
+  messagingSenderId: "334908801846",
+  appId: "1:334908801846:web:de9c1e3d9b529235a22997"
+};
+// =====================================================================
+
+const FB = "https://www.gstatic.com/firebasejs/10.12.2/";
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const saved = JSON.parse(document.getElementById("sorteo").textContent || "null");
-
-// ---------- light obfuscation so the pairs are not readable at a glance ----------
-function obf(str){
-  const data = enc.encode(str), k = enc.encode(KEY), salt = Math.floor(Math.random()*256);
-  let hex = salt.toString(16).padStart(2,"0");
-  data.forEach((b,i)=>{ hex += ((b ^ k[i % k.length] ^ salt) & 255).toString(16).padStart(2,"0"); });
-  return hex;
-}
-function deobf(hex){
-  if(!/^[0-9a-f]{4,}$/.test(hex) || hex.length % 2) return null;
-  const salt = parseInt(hex.slice(0,2),16), k = enc.encode(KEY), bytes = [];
-  for(let i=2;i<hex.length;i+=2) bytes.push(parseInt(hex.slice(i,i+2),16) ^ k[(i/2-1) % k.length] ^ salt);
-  try{ return new TextDecoder("utf-8",{fatal:true}).decode(new Uint8Array(bytes)); }catch(e){ return null; }
-}
-const tokenFor = (g,r,budget) => "s-" + obf([g,r,budget||""].join("\n"));
-function readToken(tok){
-  if(!tok.startsWith("s-")) return null;
-  const s = deobf(tok.slice(2)); if(!s) return null;
-  const p = s.split("\n"); return p.length===3 && p[0] && p[1] ? {giver:p[0],receiver:p[1],budget:p[2]} : null;
-}
-const pairsOf = st => { try{ return JSON.parse(deobf(st.pairs) || "null"); }catch(e){ return null; } };
-
-// single random cycle: nobody gets themselves
-function draw(names){
-  const a = names.slice();
-  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a.map((g,i)=>[g, a[(i+1)%a.length]]);
-}
 
 // ---------- helpers ----------
 const el = (tag, attrs={}, ...kids) => {
@@ -166,41 +152,47 @@ const el = (tag, attrs={}, ...kids) => {
     if(v==null || v===false) continue;
     if(k==="class") n.className=v; else if(k==="style") n.style.cssText=v; else if(k.startsWith("on")) n.addEventListener(k.slice(2),v); else n.setAttribute(k,v===true?"":v);
   }
-  kids.flat().forEach(c => { if(c==null||c==="") return; n.append(c instanceof Node ? c : document.createTextNode(c)); });
+  kids.flat().forEach(c => { if(c==null||c===""||c===false) return; n.append(c instanceof Node ? c : document.createTextNode(String(c))); });
   return n;
 };
 const app = document.getElementById("app");
 const show = (...nodes) => { app.replaceChildren(el("div",{class:"screen"},...nodes)); window.scrollTo({top:0,behavior:reduced?"auto":"smooth"}); };
 let toastT;
-function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2000); }
-async function copy(text, okMsg, fb){
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2400); }
+async function copy(text, okMsg){
   try{ await navigator.clipboard.writeText(text); toast(okMsg); }
-  catch(e){ if(fb){ fb.hidden=false; fb.value=text; fb.select(); } toast("Selecciona el texto y cópialo"); }
+  catch(e){ prompt("Copia este enlace:", text); }
 }
 const sleep = ms => new Promise(r=>setTimeout(r, reduced ? 0 : ms));
 const PALETTE = ["#1f5c3f","#c2364a","#b07d12","#2d6a8f","#7a4b9c","#b4532a","#3b7d5a","#9c3d6b"];
 const colorFor = name => PALETTE[[...name].reduce((a,c)=>a+c.codePointAt(0),0) % PALETTE.length];
 const initials = n => n.split(" ").filter(Boolean).slice(0,2).map(w=>[...w][0].toUpperCase()).join("");
-const store = { get(k){ try{return localStorage.getItem(k);}catch(e){return null;} }, set(k,v){ try{localStorage.setItem(k,v);}catch(e){} } };
-const meKey = () => "yo:" + (saved && saved.drawnAt);
+const drawLink = id => location.origin + location.pathname + "?s=" + encodeURIComponent(id);
+const fmtDate = ts => ts && ts.toDate ? ts.toDate().toLocaleDateString("es-ES",{day:"numeric",month:"short",year:"numeric"}) : "";
 
-// ---------- snow ----------
+// single random cycle: nobody gets themselves
+function makePairs(n){
+  const a = [...Array(n).keys()];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a.map((g,i)=>[g, a[(i+1)%a.length]]);
+}
+
+// ---------- snow & confetti ----------
 (function snow(){
   if(reduced) return;
   const c = document.getElementById("snow"), x = c.getContext("2d");
-  let W,H,flakes=[];
+  let W,H; const flakes=[];
   const resize = () => { W=c.width=innerWidth*devicePixelRatio; H=c.height=innerHeight*devicePixelRatio; };
   resize(); addEventListener("resize",resize);
   for(let i=0;i<45;i++) flakes.push({x:Math.random(),y:Math.random(),r:1+Math.random()*2.5,s:.0006+Math.random()*.0012,w:Math.random()*6});
+  const col = () => getComputedStyle(document.documentElement).getPropertyValue("--snow");
   (function loop(t){
-    x.clearRect(0,0,W,H); x.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--snow");
+    x.clearRect(0,0,W,H); x.fillStyle=col();
     for(const f of flakes){ f.y+=f.s; if(f.y>1.02){f.y=-.02;f.x=Math.random();}
       x.beginPath(); x.arc((f.x+Math.sin(t/1800+f.w)*.01)*W, f.y*H, f.r*devicePixelRatio, 0, 7); x.fill(); }
     requestAnimationFrame(loop);
   })(0);
 })();
-
-// ---------- confetti ----------
 function confetti(){
   if(reduced) return;
   const c = document.getElementById("confetti"), x = c.getContext("2d"), dpr = devicePixelRatio;
@@ -218,147 +210,277 @@ function confetti(){
   })(start);
 }
 
-// ---------- organizer powers ----------
-let current = "";
-let canPublish = null; // null = unknown, decided by the platform or by a refused publish
-(async () => {
-  const user = window.claude?.use ? await window.claude.use("user").catch(()=>null) : null;
-  const ok = user ? await user.canEdit().catch(()=>false) : false;
-  canPublish = !!ok;
-  if((ok && current === "who") || (!ok && current === "setup")) route();
-})();
-
-function docFrom(state){
-  const json = JSON.stringify(state).replace(/</g,"\\u003c");
-  const reset = ":root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}";
-  return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+reset+'</style></head><body>'
-    + '<title>Amigo Invisible</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'
-    + document.querySelector('link[href*="fonts.googleapis"]').outerHTML + "\n"
-    + document.getElementById("css").outerHTML + "\n\n"
-    + '<canvas id="snow" aria-hidden="true"></canvas>\n<canvas id="confetti" aria-hidden="true"></canvas>\n<div class="wrap" id="app"></div>\n<div class="toast" id="toast" hidden></div>\n\n'
-    + '<script type="application/json" id="sorteo">' + json + '<\/script>\n'
-    + document.getElementById("main").outerHTML
-    + '</body></html>';
-}
-async function save(state){
-  const artifact = window.claude?.use ? await window.claude.use("artifact").catch(()=>null) : null;
-  if(!artifact) throw {code:"not_granted"};
-  await artifact.publish(docFrom(state));
+// ---------- not configured yet ----------
+if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
+  show(el("div",{class:"eyebrow"},"Falta un paso"), el("h1",{},"Conecta la base de datos"),
+    el("p",{class:"lead"},"Esta web necesita un proyecto de Firebase para guardar los sorteos y bloquear los nombres. Abre index.html, pega tu firebaseConfig arriba del todo y vuelve a subir el archivo."));
+  throw new Error("Falta firebaseConfig");
 }
 
-// ---------- screens ----------
-const setup = { names: saved ? saved.people.slice() : [], event: saved?.event || "", budget: saved?.budget || "", date: saved?.date || "", error:"" };
+// ---------- Firebase ----------
+let db, uid, F;
+try{
+  const [{initializeApp}, A, S] = await Promise.all([import(FB+"firebase-app.js"), import(FB+"firebase-auth.js"), import(FB+"firebase-firestore.js")]);
+  F = S;
+  const fbApp = initializeApp(firebaseConfig);
+  db = S.getFirestore(fbApp);
+  const auth = A.getAuth(fbApp);
+  await A.signInAnonymously(auth);
+  uid = auth.currentUser.uid;
+}catch(e){
+  console.error(e);
+  show(el("h1",{},"No se puede conectar"),
+    el("p",{class:"lead"},"Revisa tu conexión a internet y recarga la página. Si eres quien organiza: comprueba que en Firebase está activado el inicio de sesión Anónimo y creada la base de datos Firestore."),
+    el("p",{class:"hint"}, "Detalle: " + (e.code || e.message)));
+  throw e;
+}
 
-function screenSetup(){
-  current = "setup";
+// ---------- data ----------
+const drawRef = id => F.doc(db,"draws",id);
+const claimsCol = id => F.collection(db,"draws",id,"claims");
+
+async function createDraw({title,budget,date,people}){
+  const ref = F.doc(F.collection(db,"draws"));
+  const batch = F.writeBatch(db);
+  batch.set(ref,{ title, budget, date, people, keys: people.map((_,i)=>String(i)), ownerUid: uid, createdAt: F.serverTimestamp() });
+  for(const [g,r] of makePairs(people.length)) batch.set(F.doc(db,"draws",ref.id,"secrets",String(g)), { receiver: people[r] });
+  await batch.commit();
+  return ref.id;
+}
+async function claim(drawId, key){
+  await F.runTransaction(db, async tx => {
+    const c = F.doc(db,"draws",drawId,"claims",key);
+    const snap = await tx.get(c);
+    if(snap.exists()) throw {code:"taken"};
+    tx.set(c,{ uid, at: F.serverTimestamp() });
+  });
+}
+async function readSecret(drawId, key){
+  const s = await F.getDoc(F.doc(db,"draws",drawId,"secrets",key));
+  return s.exists() ? s.data().receiver : null;
+}
+
+// ---------- routing ----------
+let unsub = null;
+function route(){
+  if(unsub){ unsub(); unsub = null; }
+  const params = new URLSearchParams(location.search);
+  const id = params.get("s");
+  if(id) return screenDraw(id);
+  if(location.hash === "#crear") return screenCreate();
+  screenHome();
+}
+addEventListener("popstate", route);
+function go(url){ history.pushState(null,"",url); route(); }
+
+// ---------- home ----------
+async function screenHome(){
+  const mine = el("div",{class:"stack"}, el("div",{class:"spinner"}));
+  show(
+    el("div",{class:"eyebrow"},"Amigo Invisible"),
+    el("h1",{},"Sorteos"),
+    el("p",{class:"lead"},"Crea un sorteo, manda el enlace al grupo y cada uno entra en su nombre. Cuando alguien entra, su nombre queda bloqueado para los demás."),
+    el("div",{class:"actions"}, el("button",{class:"primary big",onclick:()=>go(location.pathname+"#crear")},"Crear nuevo sorteo")),
+    el("div",{class:"card"}, el("h2",{},"Tus sorteos"), mine)
+  );
+  try{
+    const qs = await F.getDocs(F.query(F.collection(db,"draws"), F.where("ownerUid","==",uid)));
+    const items = qs.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    if(!items.length){ mine.replaceChildren(el("p",{class:"hint"},"Aún no has creado ninguno en este navegador.")); return; }
+    mine.replaceChildren(el("ul",{class:"list"}, items.map(d=>el("li",{},
+      el("div",{style:"display:flex;flex-direction:column;min-width:0"}, el("span",{class:"who"}, d.title || "Sorteo sin nombre"),
+        el("span",{class:"hint"}, `${d.people.length} personas` + (fmtDate(d.createdAt) ? ` · ${fmtDate(d.createdAt)}` : ""))),
+      el("div",{class:"actions"},
+        el("button",{class:"ghost",onclick:()=>copy(drawLink(d.id),"Enlace copiado")},"Copiar enlace"),
+        el("button",{class:"ghost",onclick:()=>go("?s="+d.id)},"Abrir"))))));
+  }catch(e){ console.error(e); mine.replaceChildren(el("p",{class:"err"},"No se han podido cargar tus sorteos.")); }
+}
+
+// ---------- create ----------
+const form = { names:[], title:"", budget:"", date:"", error:"" };
+function screenCreate(){
   const nameInput = el("input",{id:"name",placeholder:"Nombre, por ejemplo Lucía",autocomplete:"off",maxlength:"40"});
   const add = () => {
     const v = nameInput.value.trim().replace(/\s+/g," "); if(!v) return;
-    if(setup.names.some(n=>n.toLowerCase()===v.toLowerCase())) setup.error = `"${v}" ya está en la lista. Añade un apellido para distinguirlos.`;
-    else { setup.names.push(v); setup.error=""; }
-    screenSetup(); document.getElementById("name").focus();
+    if(form.names.some(n=>n.toLowerCase()===v.toLowerCase())) form.error = `"${v}" ya está en la lista. Añade un apellido para distinguirlos.`;
+    else if(form.names.length>=60) form.error = "Máximo 60 personas.";
+    else { form.names.push(v); form.error=""; }
+    screenCreate(); document.getElementById("name").focus();
   };
   nameInput.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
-  const bind = (id,key,ph) => { const i = el("input",{id,placeholder:ph,maxlength:"40",value:setup[key]}); i.addEventListener("input",e=>setup[key]=e.target.value); return i; };
-  const enough = setup.names.length >= 3;
+  const bind = (id,key,ph) => { const i = el("input",{id,placeholder:ph,maxlength:"60",value:form[key]}); i.addEventListener("input",e=>form[key]=e.target.value); return i; };
+  const enough = form.names.length >= 3;
   show(
-    el("div",{class:"eyebrow"},"Organizar sorteo"),
-    el("h1",{},"Amigo Invisible"),
-    el("p",{class:"lead"},"Apunta a los participantes y haz el sorteo. Luego compartes un único enlace con el grupo: cada uno entra, elige su nombre y abre su regalo."),
+    el("div",{class:"eyebrow"},"Nuevo sorteo"),
+    el("h1",{},"¿Quién participa?"),
     el("div",{class:"card"},
       el("div",{class:"field"}, el("label",{for:"name"},"Participantes"),
         el("div",{class:"row"}, nameInput, el("button",{class:"ghost",onclick:add},"Añadir"))),
-      setup.names.length
-        ? el("ul",{class:"chips"}, setup.names.map((n,i)=>el("li",{},n, el("button",{"aria-label":`Quitar a ${n}`,onclick:()=>{setup.names.splice(i,1);screenSetup();}},"×"))))
-        : el("p",{class:"hint"},"Aún no hay nadie. Escribe un nombre y pulsa Intro."),
-      setup.error && el("p",{class:"err"},setup.error),
-      el("div",{class:"field"}, el("label",{for:"event"},"Nombre del sorteo"), bind("event","event","Opcional, por ejemplo Navidad en casa de los abuelos")),
+      form.names.length
+        ? el("ul",{class:"chips"}, form.names.map((n,i)=>el("li",{},n, el("button",{"aria-label":`Quitar a ${n}`,onclick:()=>{form.names.splice(i,1);screenCreate();}},"×"))))
+        : el("p",{class:"hint"},"Escribe un nombre y pulsa Intro."),
+      form.error && el("p",{class:"err"},form.error),
+      el("div",{class:"field"}, el("label",{for:"title"},"Nombre del sorteo"), bind("title","title","Por ejemplo Navidad 2026")),
       el("div",{class:"grid2"},
-        el("div",{class:"field"}, el("label",{for:"budget"},"Presupuesto"), bind("budget","budget","Por ejemplo 20 €")),
+        el("div",{class:"field"}, el("label",{for:"budget"},"Presupuesto"), bind("budget","budget","Por ejemplo 25 €")),
         el("div",{class:"field"}, el("label",{for:"date"},"Día del intercambio"), bind("date","date","Por ejemplo 24 de diciembre"))),
       el("div",{class:"actions"},
-        el("button",{class:"primary big",disabled:!enough,onclick:doDraw},"Hacer el sorteo"),
-        saved && el("button",{class:"ghost",onclick:()=>route()},"Cancelar")),
-      !enough && el("p",{class:"hint"},`Hacen falta al menos 3 personas (${setup.names.length} de 3).`)
+        el("button",{class:"primary big",disabled:!enough,onclick:doCreate},"Hacer el sorteo"),
+        el("button",{class:"ghost",onclick:()=>go(location.pathname)},"Cancelar")),
+      !enough && el("p",{class:"hint"},`Hacen falta al menos 3 personas (${form.names.length} de 3).`)
     )
   );
 }
-
-async function doDraw(){
-  const names = setup.names.slice();
-  current = "drawing";
+async function doCreate(){
+  const people = form.names.slice();
   const box = el("div",{class:"shuffle"});
-  const tags = names.map(n=>{ const t=el("div",{class:"tag"},n); box.append(t); return t; });
+  const tags = people.map(n=>{ const t=el("div",{class:"tag"},n); box.append(t); return t; });
   const status = el("p",{class:"hint"},"Mezclando papelitos…");
   show(el("div",{class:"card center"}, el("h2",{},"Sorteando"), box, status));
-  for(let round=0; round<5; round++){
-    tags.forEach(t=>{ const a=Math.random()*Math.PI*2, r=40+Math.random()*80; t.style.transform=`translate(calc(-50% + ${Math.cos(a)*r*1.6}px), calc(-50% + ${Math.sin(a)*r*.7}px)) rotate(${(Math.random()-.5)*30}deg)`; });
+  const saving = createDraw({ title:form.title.trim(), budget:form.budget.trim(), date:form.date.trim(), people });
+  for(let r=0;r<5;r++){
+    tags.forEach(t=>{ const a=Math.random()*Math.PI*2, d=40+Math.random()*80; t.style.transform=`translate(calc(-50% + ${Math.cos(a)*d*1.6}px), calc(-50% + ${Math.sin(a)*d*.7}px)) rotate(${(Math.random()-.5)*30}deg)`; });
     await sleep(420);
   }
   tags.forEach(t=>t.style.transform="translate(-50%,-50%) scale(.6)");
-  await sleep(500);
-
-  const state = { event:setup.event.trim(), budget:setup.budget.trim(), date:setup.date.trim(), people:names,
-    pairs: obf(JSON.stringify(draw(names))), drawnAt: new Date().toISOString() };
-  status.textContent = "Guardando el sorteo…";
   try{
-    await save(state);
-    confetti(); status.textContent = "¡Listo!";
+    const id = await saving;
+    Object.assign(form,{names:[],title:"",budget:"",date:"",error:""});
+    confetti();
+    const url = drawLink(id);
+    show(
+      el("div",{class:"eyebrow"},"Sorteo hecho"),
+      el("h1",{},"Manda este enlace al grupo"),
+      el("div",{class:"card"},
+        el("div",{class:"linkbox"}, url),
+        el("div",{class:"actions"},
+          el("button",{class:"primary big",onclick:()=>copy(url,"Enlace copiado")},"Copiar enlace"),
+          el("button",{class:"ghost",onclick:()=>go("?s="+id)},"Abrir el sorteo")),
+        el("p",{class:"hint"},"Cada persona entra, toca su nombre y lo abre. Ese nombre queda bloqueado para los demás. Nadie, tampoco tú, puede ver lo que les ha tocado a los otros."))
+    );
   }catch(e){
-    if(e && e.code === "conflict") return; // the page is reloading to the newer version
-    canPublish = false;
+    console.error(e);
     show(el("div",{class:"card"}, el("h2",{},"No se ha podido guardar el sorteo"),
-      el("p",{class:"lead"}, e && (e.code==="not_writer"||e.code==="not_granted")
-        ? "Solo quien creó esta página puede hacer el sorteo. Ábrela con tu cuenta de organizador."
-        : "Ha fallado la conexión. Vuelve a intentarlo en un momento."),
-      el("div",{class:"actions"}, el("button",{class:"primary",onclick:screenSetup},"Volver"))));
+      el("p",{class:"lead"},"Comprueba tu conexión y vuelve a intentarlo."),
+      el("p",{class:"hint"},"Detalle: " + (e.code || e.message)),
+      el("div",{class:"actions"}, el("button",{class:"primary",onclick:screenCreate},"Volver"))));
   }
 }
 
-function screenWho(){
-  current = "who";
-  const me = store.get(meKey());
-  const meta = [saved.budget && `Presupuesto: ${saved.budget}`, saved.date && `Intercambio: ${saved.date}`].filter(Boolean);
+// ---------- a draw: who are you ----------
+async function screenDraw(id){
+  show(el("div",{class:"spinner"}));
+  let d;
+  try{
+    const snap = await F.getDoc(drawRef(id));
+    if(!snap.exists()) throw {code:"not-found"};
+    d = snap.data();
+  }catch(e){
+    return show(el("h1",{},"Sorteo no encontrado"),
+      el("p",{class:"lead"},"El enlace está incompleto o el sorteo ya no existe. Pide a quien lo organizó que te lo vuelva a mandar."));
+  }
+  const isOwner = d.ownerUid === uid;
+  let claims = {};
+  const grid = el("div",{class:"people intro"});
+  setTimeout(()=>grid.classList.remove("intro"), 1200);
+  const ownerBox = el("div");
+  const meta = [d.budget && `Presupuesto: ${d.budget}`, d.date && `Intercambio: ${d.date}`].filter(Boolean);
+
   show(
-    el("div",{class:"center",style:"display:flex;flex-direction:column;gap:10px"},
-      el("div",{class:"eyebrow"}, saved.event || "Amigo Invisible"),
+    el("div",{class:"center stack"},
+      el("div",{class:"eyebrow"}, d.title || "Amigo Invisible"),
       el("h1",{},"¿Quién eres?"),
-      el("p",{class:"lead"},"Toca tu nombre para abrir tu regalo. Solo el tuyo, que es secreto."),
+      el("p",{class:"lead"},"Toca tu nombre. Al entrar, tu nombre se bloquea y nadie más podrá abrirlo."),
       meta.length && el("div",{class:"meta"}, meta.map(m=>el("span",{class:"pill"},m)))),
-    el("div",{class:"people"}, saved.people.map((n,i)=>el("button",{class:"person"+(n===me?" me":""),style:`--i:${i}`,onclick:()=>screenConfirm(n)},
-      el("div",{class:"avatar",style:`--c:${colorFor(n)}`}, initials(n)), el("span",{},n),
-      n===me && el("small",{class:"hint"},"Tú, en este dispositivo")))),
-    canPublish && organizerPanel()
+    grid, ownerBox
   );
+
+  const render = () => {
+    grid.replaceChildren(...d.people.map((n,i)=>{
+      const c = claims[String(i)], mine = c && c.uid === uid, taken = c && !mine;
+      return el("button",{class:"person"+(taken?" taken":"")+(mine?" mine":""),style:`--i:${i}`,"aria-disabled":taken?"true":null,
+        onclick:()=> taken ? toast(`${n} ya ha entrado. Si eres tú, avisa a quien organiza.`) : mine ? screenGift(id,d,String(i),true) : screenConfirm(id,d,String(i))},
+        el("div",{class:"avatar",style:`--c:${colorFor(n)}`}, initials(n)), el("span",{},n),
+        mine ? el("small",{},"Eres tú") : taken ? el("small",{},"🔒 Ya ha entrado") : null);
+    }));
+    if(isOwner) renderOwner();
+  };
+
+  const renderOwner = () => {
+    const count = Object.keys(claims).length;
+    ownerBox.replaceChildren(el("div",{class:"card"},
+      el("div",{class:"eyebrow"},"Solo lo ves tú, como organizador"),
+      el("h2",{},`Han entrado ${count} de ${d.people.length}`),
+      el("div",{class:"actions"},
+        el("button",{class:"primary",onclick:()=>copy(drawLink(id),"Enlace copiado")},"Copiar enlace del grupo"),
+        el("button",{class:"ghost",onclick:()=>go(location.pathname)},"Mis sorteos")),
+      el("ul",{class:"list"}, d.people.map((n,i)=>{
+        const k = String(i), c = claims[k];
+        const li = el("li",{}, el("span",{class:"who"},n));
+        if(!c){ li.append(el("span",{class:"status out"},"Sin entrar")); return li; }
+        const free = el("button",{class:"ghost"},"Liberar");
+        free.addEventListener("click",()=>{
+          li.replaceChildren(el("span",{class:"hint",style:"flex:1"},`¿Liberar a ${n}? Úsalo solo si ${n} no ha podido entrar o si otra persona entró por error.`),
+            el("div",{class:"actions"},
+              el("button",{class:"primary",onclick:async()=>{ try{ await F.deleteDoc(F.doc(db,"draws",id,"claims",k)); toast(`${n} liberado`); }catch(e){ toast("No se ha podido liberar"); } }},"Liberar"),
+              el("button",{class:"ghost",onclick:render},"Cancelar")));
+        });
+        li.append(el("div",{class:"actions",style:"align-items:center"}, el("span",{class:"status in"}, c.uid===uid ? "Eres tú" : "Ha entrado"), free));
+        return li;
+      }))
+    ));
+  };
+
+  render();
+  unsub = F.onSnapshot(claimsCol(id), qs => {
+    claims = {}; qs.forEach(doc => claims[doc.id] = doc.data());
+    if(document.body.contains(grid)) render();
+  }, err => console.error(err));
 }
 
-function screenConfirm(name){
-  current = "confirm";
+function screenConfirm(id, d, key){
+  const name = d.people[Number(key)];
+  const yes = el("button",{class:"primary big"},"Sí, soy yo");
+  const err = el("p",{class:"err",hidden:true});
+  yes.addEventListener("click", async () => {
+    yes.disabled = true; yes.textContent = "Entrando…";
+    try{ await claim(id,key); screenGift(id,d,key,true); }
+    catch(e){
+      console.error(e);
+      yes.disabled = false; yes.textContent = "Sí, soy yo";
+      err.hidden = false;
+      err.textContent = (e.code==="taken" || e.code==="permission-denied")
+        ? `Alguien ya ha entrado como ${name}. Si eres tú, avisa a quien organiza para que lo libere.`
+        : "No se ha podido entrar. Comprueba tu conexión y vuelve a intentarlo.";
+    }
+  });
+  if(unsub){ unsub(); unsub=null; }
   show(el("div",{class:"card center",style:"padding:32px 20px"},
     el("div",{class:"avatar",style:`--c:${colorFor(name)};width:72px;height:72px;font-size:1.7rem`}, initials(name)),
     el("h1",{},`¿Eres ${name}?`),
-    el("p",{class:"lead"},"Si no eres tú, vuelve atrás. Si abres el regalo de otra persona, le estropeas la sorpresa."),
-    el("div",{class:"actions"},
-      el("button",{class:"primary big",onclick:()=>{ store.set(meKey(),name); screenGift(name); }},"Sí, soy yo"),
-      el("button",{class:"ghost",onclick:screenWho},"No, volver"))));
+    el("p",{class:"lead"},`Al confirmar, el nombre ${name} quedará bloqueado para siempre en este móvil u ordenador. Nadie más podrá abrirlo.`),
+    err,
+    el("div",{class:"actions"}, yes, el("button",{class:"ghost",onclick:()=>screenDraw(id)},"No, volver"))));
 }
 
-function screenGift(name){
-  current = "gift";
-  const pair = (pairsOf(saved) || []).find(p=>p[0]===name);
-  if(!pair){ show(el("div",{class:"card"}, el("h2",{},"No encuentro tu nombre en el sorteo"), el("p",{class:"lead"},"Avisa a quien organizó el sorteo."))); return; }
-  giftStage(name, pair[1], saved.budget, saved.date, true);
-}
+async function screenGift(id, d, key, canGoBack){
+  if(unsub){ unsub(); unsub=null; }
+  const giver = d.people[Number(key)];
+  show(el("div",{class:"spinner"}));
+  let receiver;
+  try{ receiver = await readSecret(id,key); }catch(e){ console.error(e); }
+  if(!receiver) return show(el("div",{class:"card"}, el("h2",{},"No se puede abrir tu regalo"),
+    el("p",{class:"lead"},"Este nombre está bloqueado en otro móvil u ordenador. Si eres tú, pide a quien organiza que lo libere y vuelve a entrar."),
+    el("div",{class:"actions"}, el("button",{class:"ghost",onclick:()=>screenDraw(id)},"Volver"))));
 
-function giftStage(giver, receiver, budget, date, canGoBack){
   let taps = 0;
   const dots = el("div",{class:"taps"}, el("i"),el("i"),el("i"));
   const hint = el("p",{class:"hint"},"Toca el regalo 3 veces para abrirlo");
   const slot = el("div",{class:"slot",hidden:true});
-  const after = el("div",{class:"center",style:"display:flex;flex-direction:column;gap:12px",hidden:true},
-    el("div",{class:"meta"}, budget && el("span",{class:"pill"},`Presupuesto: ${budget}`), date && el("span",{class:"pill"},`Intercambio: ${date}`)),
-    el("p",{class:"hint"},"Es secreto. No se lo cuentes a nadie."),
-    canGoBack && el("div",{class:"actions"}, el("button",{class:"ghost",onclick:screenWho},"Volver al inicio")));
+  const after = el("div",{class:"center stack",hidden:true},
+    el("div",{class:"meta"}, d.budget && el("span",{class:"pill"},`Presupuesto: ${d.budget}`), d.date && el("span",{class:"pill"},`Intercambio: ${d.date}`)),
+    el("p",{class:"hint"},"Es secreto. No se lo cuentes a nadie. Puedes volver a verlo desde este mismo móvil u ordenador."),
+    canGoBack && el("div",{class:"actions"}, el("button",{class:"ghost",onclick:()=>screenDraw(id)},"Volver")));
   const gift = el("button",{class:"gift","aria-label":"Tocar el regalo"},
     el("div",{class:"box"}, el("div",{class:"rib"})),
     el("div",{class:"lid"}, el("div",{class:"rib"}), el("div",{class:"bow"})));
@@ -370,69 +492,21 @@ function giftStage(giver, receiver, budget, date, canGoBack){
     gift.classList.add("open"); hint.textContent = "Te ha tocado regalar a…";
     await sleep(600);
     gift.hidden = true; dots.hidden = true; slot.hidden = false;
-    await spin(slot, receiver, giver);
+    const pool = d.people.filter(n=>n!==giver);
+    for(let i=0;i<(reduced?0:22);i++){
+      slot.replaceChildren(el("div",{class:"name tick"}, pool[Math.floor(Math.random()*pool.length)]));
+      await sleep(45 + i*i*0.9);
+    }
+    slot.replaceChildren(el("div",{class:"name land"}, receiver));
     confetti(); after.hidden = false;
   });
   show(
-    el("div",{class:"eyebrow",style:"text-align:center"}, saved?.event || "Amigo Invisible"),
+    el("div",{class:"eyebrow",style:"text-align:center"}, d.title || "Amigo Invisible"),
     el("div",{class:"card stage"}, el("h1",{style:"text-align:center"},`Hola, ${giver}`), gift, dots, hint, slot, after)
   );
 }
 
-async function spin(slot, receiver, giver){
-  const pool = (saved ? saved.people : [receiver]).filter(n=>n!==giver);
-  const steps = reduced ? 0 : 22;
-  for(let i=0;i<steps;i++){
-    const n = el("div",{class:"name tick",style:"color:var(--muted)"}, pool[Math.floor(Math.random()*pool.length)]);
-    slot.replaceChildren(n);
-    await sleep(45 + i*i*0.9);
-  }
-  slot.replaceChildren(el("div",{class:"name land"}, receiver));
-}
-
-function organizerPanel(){
-  const pairs = pairsOf(saved) || [];
-  const linksBox = el("div",{hidden:true,style:"display:flex;flex-direction:column;gap:10px"},
-    el("p",{class:"hint"},"Opcional y más secreto: manda a cada persona su propio enlace, que abre directamente su regalo."),
-    el("ul",{class:"links"}, pairs.map(([g,r])=>{
-      const url = BASE_URL + "#" + tokenFor(g,r,saved.budget);
-      const fb = el("input",{readonly:true,hidden:true,"aria-label":`Enlace de ${g}`});
-      return el("li",{}, el("div",{style:"display:flex;flex-direction:column;gap:6px;min-width:0;flex:1"}, el("span",{class:"who"},g), fb),
-        el("button",{class:"ghost",onclick:()=>copy(url,`Enlace de ${g} copiado`,fb)},"Copiar"));
-    })));
-  const fb = el("input",{readonly:true,hidden:true,"aria-label":"Enlace del grupo"});
-  const confirmBox = el("div",{hidden:true,class:"card",style:"background:var(--soft)"},
-    el("p",{},"Si haces un sorteo nuevo, el actual se borra y a todos les puede tocar otra persona."),
-    el("div",{class:"actions"}, el("button",{class:"primary",onclick:screenSetup},"Sí, sortear de nuevo"),
-      el("button",{class:"ghost",onclick:()=>confirmBox.hidden=true},"Cancelar")));
-  return el("div",{class:"card"},
-    el("div",{class:"eyebrow"},"Solo lo ves tú, como organizador"),
-    el("h2",{},"Comparte este enlace con el grupo"),
-    el("p",{class:"hint"},"Antes, activa el enlace público en el menú Compartir de la página."),
-    el("div",{class:"actions"},
-      el("button",{class:"primary",onclick:()=>copy(BASE_URL,"Enlace del grupo copiado",fb)},"Copiar enlace del grupo"),
-      el("button",{class:"ghost",onclick:()=>linksBox.hidden=!linksBox.hidden},"Enlaces individuales"),
-      el("button",{class:"link",onclick:()=>confirmBox.hidden=false},"Hacer un sorteo nuevo")),
-    fb, linksBox, confirmBox);
-}
-
-// ---------- routing ----------
-function route(){
-  const tok = decodeURIComponent(location.hash.slice(1));
-  if(tok.startsWith("s-")){
-    const d = readToken(tok);
-    if(d) return giftStage(d.giver, d.receiver, d.budget, saved?.date, false);
-    return show(el("h1",{},"Enlace no válido"), el("p",{class:"lead"},"Este enlace está incompleto. Pide a quien organizó el sorteo que te lo vuelva a enviar."));
-  }
-  if(saved && saved.pairs) return screenWho();
-  if(canPublish === false) return show(el("div",{class:"center",style:"display:flex;flex-direction:column;gap:12px"},
-    el("div",{class:"eyebrow"},"Amigo Invisible"), el("h1",{},"Todavía no hay sorteo"),
-    el("p",{class:"lead"},"Quien organiza aún no ha hecho el sorteo. Vuelve a abrir este enlace más tarde.")));
-  screenSetup();
-}
-addEventListener("hashchange",route);
 route();
 </script>
-
 </body>
 </html>
