@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Amigo Invisible</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style id="css">
+/* Layout: one centred column; screens (setup, who-are-you, confirm, gift, result) swap in place over a light snowfall */
+:root{
+  --bg:#eef3ef; --surface:#ffffff; --fg:#17261d; --muted:#5b6d61; --line:#d3ded6;
+  --pine:#1f5c3f; --pine-ink:#ffffff; --berry:#c2364a; --gold:#d9a227; --soft:#e2ece5; --snow:rgba(31,92,63,.16);
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1712; --surface:#17221b; --fg:#e7f0ea; --muted:#9db0a3; --line:#2a3a30;
+  --pine:#3f9a6c; --pine-ink:#08130d; --berry:#f06a7c; --gold:#e8b94a; --soft:#1d2b22; --snow:rgba(231,240,234,.22); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1712; --surface:#17221b; --fg:#e7f0ea; --muted:#9db0a3; --line:#2a3a30;
+  --pine:#3f9a6c; --pine-ink:#08130d; --berry:#f06a7c; --gold:#e8b94a; --soft:#1d2b22; --snow:rgba(231,240,234,.22); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 56px;overflow-x:hidden}
+#snow,#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#snow{z-index:0}#confetti{z-index:30}
+.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,7vw,2.8rem);font-weight:800;line-height:1.05}
+h2{font-size:1.15rem;font-weight:600}
+p{margin:0}
+.lead{color:var(--muted);max-width:60ch}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--berry);font-weight:600}
+.center{text-align:center;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-weight:600;font-size:.9rem}
+.field{display:flex;flex-direction:column;gap:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input:focus-visible,button:focus-visible{outline:3px solid var(--berry);outline-offset:2px}
+.row{display:flex;gap:8px}.row input{flex:1}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:10px;border:1px solid transparent;padding:10px 16px;transition:transform .15s ease,background .2s}
+button:active{transform:scale(.97)}
+.primary{background:var(--pine);color:var(--pine-ink)}
+.primary.big{padding:14px 22px;font-size:1.05rem}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px;font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.chips li{display:flex;align-items:center;gap:6px;background:var(--soft);border-radius:999px;padding:4px 6px 4px 12px;font-weight:500;animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
+.chips button{padding:2px 8px;border-radius:999px;background:transparent;color:var(--muted);font-size:1rem;line-height:1}
+.hint{font-size:.88rem;color:var(--muted)}
+.err{font-size:.9rem;color:var(--berry);font-weight:500}
+.meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pill{background:var(--soft);border-radius:999px;padding:4px 14px;font-weight:600;font-size:.9rem;font-variant-numeric:tabular-nums}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.center .actions{justify-content:center}
+
+/* who are you */
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.person{background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  animation:rise .45s both cubic-bezier(.2,.9,.3,1.2);animation-delay:calc(var(--i) * 45ms)}
+.person:hover{transform:translateY(-3px) rotate(-1deg);border-color:var(--pine)}
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.2rem;color:#fff;background:var(--c)}
+.person span{font-weight:600;overflow-wrap:anywhere;text-align:center}
+.person.me{border-color:var(--berry);box-shadow:0 0 0 2px var(--berry) inset}
+
+/* gift */
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 12px 32px}
+.gift{width:150px;height:150px;position:relative;border:0;background:none;padding:0;cursor:pointer;animation:bob 2.4s ease-in-out infinite}
+.gift .box{position:absolute;left:15px;right:15px;bottom:0;height:90px;background:var(--pine);border-radius:10px}
+.gift .lid{position:absolute;left:5px;right:5px;top:38px;height:28px;background:var(--pine);border-radius:8px;filter:brightness(1.12);transform-origin:20% 100%}
+.gift .rib{position:absolute;left:50%;width:20px;margin-left:-10px;top:0;bottom:0;background:var(--berry)}
+.gift .bow{position:absolute;left:50%;top:8px;width:60px;height:32px;margin-left:-30px}
+.gift .bow::before,.gift .bow::after{content:"";position:absolute;top:0;width:28px;height:28px;border:7px solid var(--berry);border-radius:50% 50% 0 50%}
+.gift .bow::before{left:0;transform:rotate(-20deg)}
+.gift .bow::after{right:0;border-radius:50% 50% 50% 0;transform:rotate(20deg)}
+.gift.s1{animation:shake .4s}
+.gift.s2{animation:shake .4s 2}
+.gift.open{animation:none}
+.gift.open .lid{animation:lidoff .8s forwards cubic-bezier(.3,.7,.4,1)}
+.gift.open .box{animation:squash .5s}
+.taps{display:flex;gap:8px}
+.taps i{width:10px;height:10px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+.taps i.on{background:var(--berry);transform:scale(1.3)}
+.slot{height:4.2rem;overflow:hidden;display:grid;place-items:center;width:100%}
+.name{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,10vw,3.4rem);line-height:1.05;color:var(--berry);overflow-wrap:anywhere;text-align:center}
+.slot .name.tick{animation:tick .1s linear}
+.name.land{animation:land .7s cubic-bezier(.3,1.7,.5,1)}
+
+/* drawing animation (organizer) */
+.shuffle{position:relative;height:220px;overflow:hidden}
+.shuffle .tag{position:absolute;left:50%;top:50%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:600;white-space:nowrap;
+  transition:transform .55s cubic-bezier(.5,0,.3,1.3)}
+
+.links{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.links li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.links li:first-child{border-top:0}
+.links .who{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.links button{padding:6px 12px;font-size:.9rem}
+.toast{position:fixed;z-index:40;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;font-size:.9rem;animation:rise .25s}
+.screen{display:flex;flex-direction:column;gap:20px;animation:fadein .35s ease}
+
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes pop{from{transform:scale(.6)}to{transform:none}}
+@keyframes fadein{from{opacity:.0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@keyframes lidoff{to{transform:translate(70px,-110px) rotate(48deg);opacity:0}}
+@keyframes squash{40%{transform:scaleY(.86) scaleX(1.08)}100%{transform:none}}
+@keyframes tick{from{transform:translateY(-60%);opacity:.2}to{transform:none;opacity:1}}
+@keyframes land{0%{transform:scale(.4);opacity:0}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script type="application/json" id="sorteo">{"event":"","budget":"25","date":"","people":["akash","jorge","jorge culon","sergio","levi","gurki","caballo","emilio"],"pairs":"407a760b4b4a1b400c1a0b5048404d49015c0d6f187e0d424c4b464301460c1a0b404c504b4c0211721e6f075c445f4e4e404f050c5742525a4a0e7841680d535f445c490f050545025b495309505c4e434b4f6e0369164f40534a4c074c184541580b1f0b4843570a560d6f187e0d4b425b404a4f050c53445a454b4307301f74105148464d444605034f4e5b44425a0b7f007e4f545a405f4c0d0d0f454259040b736b","drawnAt":"2026-11-24T20:11:17.871Z"}</script>
+<script id="main">
+const BASE_URL = "https://claude.ai/artifact/8AHVT4KWFcY3TakLiV3wJW";
+const KEY = "amigo-invisible-sorteo";
+const enc = new TextEncoder();
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const saved = JSON.parse(document.getElementById("sorteo").textContent || "null");
+
+// ---------- light obfuscation so the pairs are not readable at a glance ----------
+function obf(str){
+  const data = enc.encode(str), k = enc.encode(KEY), salt = Math.floor(Math.random()*256);
+  let hex = salt.toString(16).padStart(2,"0");
+  data.forEach((b,i)=>{ hex += ((b ^ k[i % k.length] ^ salt) & 255).toString(16).padStart(2,"0"); });
+  return hex;
+}
+function deobf(hex){
+  if(!/^[0-9a-f]{4,}$/.test(hex) || hex.length % 2) return null;
+  const salt = parseInt(hex.slice(0,2),16), k = enc.encode(KEY), bytes = [];
+  for(let i=2;i<hex.length;i+=2) bytes.push(parseInt(hex.slice(i,i+2),16) ^ k[(i/2-1) % k.length] ^ salt);
+  try{ return new TextDecoder("utf-8",{fatal:true}).decode(new Uint8Array(bytes)); }catch(e){ return null; }
+}
+const tokenFor = (g,r,budget) => "s-" + obf([g,r,budget||""].join("\n"));
+function readToken(tok){
+  if(!tok.startsWith("s-")) return null;
+  const s = deobf(tok.slice(2)); if(!s) return null;
+  const p = s.split("\n"); return p.length===3 && p[0] && p[1] ? {giver:p[0],receiver:p[1],budget:p[2]} : null;
+}
+const pairsOf = st => { try{ return JSON.parse(deobf(st.pairs) || "null"); }catch(e){ return null; } };
+
+// single random cycle: nobody gets themselves
+function draw(names){
+  const a = names.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a.map((g,i)=>[g, a[(i+1)%a.length]]);
+}
+
+// ---------- helpers ----------
+const el = (tag, attrs={}, ...kids) => {
+  const n = document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs)){
+    if(v==null || v===false) continue;
+    if(k==="class") n.className=v; else if(k==="style") n.style.cssText=v; else if(k.startsWith("on")) n.addEventListener(k.slice(2),v); else n.setAttribute(k,v===true?"":v);
+  }
+  kids.flat().forEach(c => { if(c==null||c==="") return; n.append(c instanceof Node ? c : document.createTextNode(c)); });
+  return n;
+};
+const app = document.getElementById("app");
+const show = (...nodes) => { app.replaceChildren(el("div",{class:"screen"},...nodes)); window.scrollTo({top:0,behavior:reduced?"auto":"smooth"}); };
+let toastT;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2000); }
+async function copy(text, okMsg, fb){
+  try{ await navigator.clipboard.writeText(text); toast(okMsg); }
+  catch(e){ if(fb){ fb.hidden=false; fb.value=text; fb.select(); } toast("Selecciona el texto y cópialo"); }
+}
+const sleep = ms => new Promise(r=>setTimeout(r, reduced ? 0 : ms));
+const PALETTE = ["#1f5c3f","#c2364a","#b07d12","#2d6a8f","#7a4b9c","#b4532a","#3b7d5a","#9c3d6b"];
+const colorFor = name => PALETTE[[...name].reduce((a,c)=>a+c.codePointAt(0),0) % PALETTE.length];
+const initials = n => n.split(" ").filter(Boolean).slice(0,2).map(w=>[...w][0].toUpperCase()).join("");
+const store = { get(k){ try{return localStorage.getItem(k);}catch(e){return null;} }, set(k,v){ try{localStorage.setItem(k,v);}catch(e){} } };
+const meKey = () => "yo:" + (saved && saved.drawnAt);
+
+// ---------- snow ----------
+(function snow(){
+  if(reduced) return;
+  const c = document.getElementById("snow"), x = c.getContext("2d");
+  let W,H,flakes=[];
+  const resize = () => { W=c.width=innerWidth*devicePixelRatio; H=c.height=innerHeight*devicePixelRatio; };
+  resize(); addEventListener("resize",resize);
+  for(let i=0;i<45;i++) flakes.push({x:Math.random(),y:Math.random(),r:1+Math.random()*2.5,s:.0006+Math.random()*.0012,w:Math.random()*6});
+  (function loop(t){
+    x.clearRect(0,0,W,H); x.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--snow");
+    for(const f of flakes){ f.y+=f.s; if(f.y>1.02){f.y=-.02;f.x=Math.random();}
+      x.beginPath(); x.arc((f.x+Math.sin(t/1800+f.w)*.01)*W, f.y*H, f.r*devicePixelRatio, 0, 7); x.fill(); }
+    requestAnimationFrame(loop);
+  })(0);
+})();
+
+// ---------- confetti ----------
+function confetti(){
+  if(reduced) return;
+  const c = document.getElementById("confetti"), x = c.getContext("2d"), dpr = devicePixelRatio;
+  c.width = innerWidth*dpr; c.height = innerHeight*dpr;
+  const css = getComputedStyle(document.documentElement);
+  const cols = ["--berry","--pine","--gold"].map(v=>css.getPropertyValue(v).trim()).concat(["#ffffff"]);
+  const ps = Array.from({length:160},()=>({x:c.width/2,y:c.height*.42,vx:(Math.random()-.5)*22*dpr,vy:(-Math.random()*20-6)*dpr,
+    w:(5+Math.random()*7)*dpr,h:(3+Math.random()*5)*dpr,r:Math.random()*6,vr:(Math.random()-.5)*.4,col:cols[Math.floor(Math.random()*cols.length)]}));
+  const start = performance.now();
+  (function loop(now){
+    const t = now-start; x.clearRect(0,0,c.width,c.height);
+    for(const p of ps){ p.vy+=.55*dpr; p.vx*=.99; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr;
+      x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.globalAlpha=Math.max(0,1-t/3200); x.fillStyle=p.col; x.fillRect(-p.w/2,-p.h/2,p.w,p.h); x.restore(); }
+    if(t<3200) requestAnimationFrame(loop); else x.clearRect(0,0,c.width,c.height);
+  })(start);
+}
+
+// ---------- organizer powers ----------
+let current = "";
+let canPublish = null; // null = unknown, decided by the platform or by a refused publish
+(async () => {
+  const user = window.claude?.use ? await window.claude.use("user").catch(()=>null) : null;
+  const ok = user ? await user.canEdit().catch(()=>false) : false;
+  canPublish = !!ok;
+  if((ok && current === "who") || (!ok && current === "setup")) route();
+})();
+
+function docFrom(state){
+  const json = JSON.stringify(state).replace(/</g,"\\u003c");
+  const reset = ":root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}";
+  return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+reset+'</style></head><body>'
+    + '<title>Amigo Invisible</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'
+    + document.querySelector('link[href*="fonts.googleapis"]').outerHTML + "\n"
+    + document.getElementById("css").outerHTML + "\n\n"
+    + '<canvas id="snow" aria-hidden="true"></canvas>\n<canvas id="confetti" aria-hidden="true"></canvas>\n<div class="wrap" id="app"></div>\n<div class="toast" id="toast" hidden></div>\n\n'
+    + '<script type="application/json" id="sorteo">' + json + '<\/script>\n'
+    + document.getElementById("main").outerHTML
+    + '</body></html>';
+}
+async function save(state){
+  const artifact = window.claude?.use ? await window.claude.use("artifact").catch(()=>null) : null;
+  if(!artifact) throw {code:"not_granted"};
+  await artifact.publish(docFrom(state));
+}
+
+// ---------- screens ----------
+const setup = { names: saved ? saved.people.slice() : [], event: saved?.event || "", budget: saved?.budget || "", date: saved?.date || "", error:"" };
+
+function screenSetup(){
+  current = "setup";
+  const nameInput = el("input",{id:"name",placeholder:"Nombre, por ejemplo Lucía",autocomplete:"off",maxlength:"40"});
+  const add = () => {
+    const v = nameInput.value.trim().replace(/\s+/g," "); if(!v) return;
+    if(setup.names.some(n=>n.toLowerCase()===v.toLowerCase())) setup.error = `"${v}" ya está en la lista. Añade un apellido para distinguirlos.`;
+    else { setup.names.push(v); setup.error=""; }
+    screenSetup(); document.getElementById("name").focus();
+  };
+  nameInput.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
+  const bind = (id,key,ph) => { const i = el("input",{id,placeholder:ph,maxlength:"40",value:setup[key]}); i.addEventListener("input",e=>setup[key]=e.target.value); return i; };
+  const enough = setup.names.length >= 3;
+  show(
+    el("div",{class:"eyebrow"},"Organizar sorteo"),
+    el("h1",{},"Amigo Invisible"),
+    el("p",{class:"lead"},"Apunta a los participantes y haz el sorteo. Luego compartes un único enlace con el grupo: cada uno entra, elige su nombre y abre su regalo."),
+    el("div",{class:"card"},
+      el("div",{class:"field"}, el("label",{for:"name"},"Participantes"),
+        el("div",{class:"row"}, nameInput, el("button",{class:"ghost",onclick:add},"Añadir"))),
+      setup.names.length
+        ? el("ul",{class:"chips"}, setup.names.map((n,i)=>el("li",{},n, el("button",{"aria-label":`Quitar a ${n}`,onclick:()=>{setup.names.splice(i,1);screenSetup();}},"×"))))
+        : el("p",{class:"hint"},"Aún no hay nadie. Escribe un nombre y pulsa Intro."),
+      setup.error && el("p",{class:"err"},setup.error),
+      el("div",{class:"field"}, el("label",{for:"event"},"Nombre del sorteo"), bind("event","event","Opcional, por ejemplo Navidad en casa de los abuelos")),
+      el("div",{class:"grid2"},
+        el("div",{class:"field"}, el("label",{for:"budget"},"Presupuesto"), bind("budget","budget","Por ejemplo 20 €")),
+        el("div",{class:"field"}, el("label",{for:"date"},"Día del intercambio"), bind("date","date","Por ejemplo 24 de diciembre"))),
+      el("div",{class:"actions"},
+        el("button",{class:"primary big",disabled:!enough,onclick:doDraw},"Hacer el sorteo"),
+        saved && el("button",{class:"ghost",onclick:()=>route()},"Cancelar")),
+      !enough && el("p",{class:"hint"},`Hacen falta al menos 3 personas (${setup.names.length} de 3).`)
+    )
+  );
+}
+
+async function doDraw(){
+  const names = setup.names.slice();
+  current = "drawing";
+  const box = el("div",{class:"shuffle"});
+  const tags = names.map(n=>{ const t=el("div",{class:"tag"},n); box.append(t); return t; });
+  const status = el("p",{class:"hint"},"Mezclando papelitos…");
+  show(el("div",{class:"card center"}, el("h2",{},"Sorteando"), box, status));
+  for(let round=0; round<5; round++){
+    tags.forEach(t=>{ const a=Math.random()*Math.PI*2, r=40+Math.random()*80; t.style.transform=`translate(calc(-50% + ${Math.cos(a)*r*1.6}px), calc(-50% + ${Math.sin(a)*r*.7}px)) rotate(${(Math.random()-.5)*30}deg)`; });
+    await sleep(420);
+  }
+  tags.forEach(t=>t.style.transform="translate(-50%,-50%) scale(.6)");
+  await sleep(500);
+
+  const state = { event:setup.event.trim(), budget:setup.budget.trim(), date:setup.date.trim(), people:names,
+    pairs: obf(JSON.stringify(draw(names))), drawnAt: new Date().toISOString() };
+  status.textContent = "Guardando el sorteo…";
+  try{
+    await save(state);
+    confetti(); status.textContent = "¡Listo!";
+  }catch(e){
+    if(e && e.code === "conflict") return; // the page is reloading to the newer version
+    canPublish = false;
+    show(el("div",{class:"card"}, el("h2",{},"No se ha podido guardar el sorteo"),
+      el("p",{class:"lead"}, e && (e.code==="not_writer"||e.code==="not_granted")
+        ? "Solo quien creó esta página puede hacer el sorteo. Ábrela con tu cuenta de organizador."
+        : "Ha fallado la conexión. Vuelve a intentarlo en un momento."),
+      el("div",{class:"actions"}, el("button",{class:"primary",onclick:screenSetup},"Volver"))));
+  }
+}
+
+function screenWho(){
+  current = "who";
+  const me = store.get(meKey());
+  const meta = [saved.budget && `Presupuesto: ${saved.budget}`, saved.date && `Intercambio: ${saved.date}`].filter(Boolean);
+  show(
+    el("div",{class:"center",style:"display:flex;flex-direction:column;gap:10px"},
+      el("div",{class:"eyebrow"}, saved.event || "Amigo Invisible"),
+      el("h1",{},"¿Quién eres?"),
+      el("p",{class:"lead"},"Toca tu nombre para abrir tu regalo. Solo el tuyo, que es secreto."),
+      meta.length && el("div",{class:"meta"}, meta.map(m=>el("span",{class:"pill"},m)))),
+    el("div",{class:"people"}, saved.people.map((n,i)=>el("button",{class:"person"+(n===me?" me":""),style:`--i:${i}`,onclick:()=>screenConfirm(n)},
+      el("div",{class:"avatar",style:`--c:${colorFor(n)}`}, initials(n)), el("span",{},n),
+      n===me && el("small",{class:"hint"},"Tú, en este dispositivo")))),
+    canPublish && organizerPanel()
+  );
+}
+
+function screenConfirm(name){
+  current = "confirm";
+  show(el("div",{class:"card center",style:"padding:32px 20px"},
+    el("div",{class:"avatar",style:`--c:${colorFor(name)};width:72px;height:72px;font-size:1.7rem`}, initials(name)),
+    el("h1",{},`¿Eres ${name}?`),
+    el("p",{class:"lead"},"Si no eres tú, vuelve atrás. Si abres el regalo de otra persona, le estropeas la sorpresa."),
+    el("div",{class:"actions"},
+      el("button",{class:"primary big",onclick:()=>{ store.set(meKey(),name); screenGift(name); }},"Sí, soy yo"),
+      el("button",{class:"ghost",onclick:screenWho},"No, volver"))));
+}
+
+function screenGift(name){
+  current = "gift";
+  const pair = (pairsOf(saved) || []).find(p=>p[0]===name);
+  if(!pair){ show(el("div",{class:"card"}, el("h2",{},"No encuentro tu nombre en el sorteo"), el("p",{class:"lead"},"Avisa a quien organizó el sorteo."))); return; }
+  giftStage(name, pair[1], saved.budget, saved.date, true);
+}
+
+function giftStage(giver, receiver, budget, date, canGoBack){
+  let taps = 0;
+  const dots = el("div",{class:"taps"}, el("i"),el("i"),el("i"));
+  const hint = el("p",{class:"hint"},"Toca el regalo 3 veces para abrirlo");
+  const slot = el("div",{class:"slot",hidden:true});
+  const after = el("div",{class:"center",style:"display:flex;flex-direction:column;gap:12px",hidden:true},
+    el("div",{class:"meta"}, budget && el("span",{class:"pill"},`Presupuesto: ${budget}`), date && el("span",{class:"pill"},`Intercambio: ${date}`)),
+    el("p",{class:"hint"},"Es secreto. No se lo cuentes a nadie."),
+    canGoBack && el("div",{class:"actions"}, el("button",{class:"ghost",onclick:screenWho},"Volver al inicio")));
+  const gift = el("button",{class:"gift","aria-label":"Tocar el regalo"},
+    el("div",{class:"box"}, el("div",{class:"rib"})),
+    el("div",{class:"lid"}, el("div",{class:"rib"}), el("div",{class:"bow"})));
+  gift.addEventListener("click", async () => {
+    if(taps>=3) return;
+    taps++; dots.children[taps-1].classList.add("on");
+    gift.classList.remove("s1","s2"); void gift.offsetWidth;
+    if(taps<3){ gift.classList.add(taps===1?"s1":"s2"); hint.textContent = taps===1 ? "Un poco más…" : "¡Una vez más!"; return; }
+    gift.classList.add("open"); hint.textContent = "Te ha tocado regalar a…";
+    await sleep(600);
+    gift.hidden = true; dots.hidden = true; slot.hidden = false;
+    await spin(slot, receiver, giver);
+    confetti(); after.hidden = false;
+  });
+  show(
+    el("div",{class:"eyebrow",style:"text-align:center"}, saved?.event || "Amigo Invisible"),
+    el("div",{class:"card stage"}, el("h1",{style:"text-align:center"},`Hola, ${giver}`), gift, dots, hint, slot, after)
+  );
+}
+
+async function spin(slot, receiver, giver){
+  const pool = (saved ? saved.people : [receiver]).filter(n=>n!==giver);
+  const steps = reduced ? 0 : 22;
+  for(let i=0;i<steps;i++){
+    const n = el("div",{class:"name tick",style:"color:var(--muted)"}, pool[Math.floor(Math.random()*pool.length)]);
+    slot.replaceChildren(n);
+    await sleep(45 + i*i*0.9);
+  }
+  slot.replaceChildren(el("div",{class:"name land"}, receiver));
+}
+
+function organizerPanel(){
+  const pairs = pairsOf(saved) || [];
+  const linksBox = el("div",{hidden:true,style:"display:flex;flex-direction:column;gap:10px"},
+    el("p",{class:"hint"},"Opcional y más secreto: manda a cada persona su propio enlace, que abre directamente su regalo."),
+    el("ul",{class:"links"}, pairs.map(([g,r])=>{
+      const url = BASE_URL + "#" + tokenFor(g,r,saved.budget);
+      const fb = el("input",{readonly:true,hidden:true,"aria-label":`Enlace de ${g}`});
+      return el("li",{}, el("div",{style:"display:flex;flex-direction:column;gap:6px;min-width:0;flex:1"}, el("span",{class:"who"},g), fb),
+        el("button",{class:"ghost",onclick:()=>copy(url,`Enlace de ${g} copiado`,fb)},"Copiar"));
+    })));
+  const fb = el("input",{readonly:true,hidden:true,"aria-label":"Enlace del grupo"});
+  const confirmBox = el("div",{hidden:true,class:"card",style:"background:var(--soft)"},
+    el("p",{},"Si haces un sorteo nuevo, el actual se borra y a todos les puede tocar otra persona."),
+    el("div",{class:"actions"}, el("button",{class:"primary",onclick:screenSetup},"Sí, sortear de nuevo"),
+      el("button",{class:"ghost",onclick:()=>confirmBox.hidden=true},"Cancelar")));
+  return el("div",{class:"card"},
+    el("div",{class:"eyebrow"},"Solo lo ves tú, como organizador"),
+    el("h2",{},"Comparte este enlace con el grupo"),
+    el("p",{class:"hint"},"Antes, activa el enlace público en el menú Compartir de la página."),
+    el("div",{class:"actions"},
+      el("button",{class:"primary",onclick:()=>copy(BASE_URL,"Enlace del grupo copiado",fb)},"Copiar enlace del grupo"),
+      el("button",{class:"ghost",onclick:()=>linksBox.hidden=!linksBox.hidden},"Enlaces individuales"),
+      el("button",{class:"link",onclick:()=>confirmBox.hidden=false},"Hacer un sorteo nuevo")),
+    fb, linksBox, confirmBox);
+}
+
+// ---------- routing ----------
+function route(){
+  const tok = decodeURIComponent(location.hash.slice(1));
+  if(tok.startsWith("s-")){
+    const d = readToken(tok);
+    if(d) return giftStage(d.giver, d.receiver, d.budget, saved?.date, false);
+    return show(el("h1",{},"Enlace no válido"), el("p",{class:"lead"},"Este enlace está incompleto. Pide a quien organizó el sorteo que te lo vuelva a enviar."));
+  }
+  if(saved && saved.pairs) return screenWho();
+  if(canPublish === false) return show(el("div",{class:"center",style:"display:flex;flex-direction:column;gap:12px"},
+    el("div",{class:"eyebrow"},"Amigo Invisible"), el("h1",{},"Todavía no hay sorteo"),
+    el("p",{class:"lead"},"Quien organiza aún no ha hecho el sorteo. Vuelve a abrir este enlace más tarde.")));
+  screenSetup();
+}
+addEventListener("hashchange",route);
+route();
+</script>
+
+</body>
+</html>
